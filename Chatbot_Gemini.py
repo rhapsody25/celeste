@@ -76,7 +76,7 @@ if "chat_history" not in st.session_state:
 def get_generative_response(prompt):
     try:
         response = model.generate_content(prompt)
-        return response.text
+        return response.result['text']
     except Exception as e:
         st.error(f"Error with Google Generative Language API: {e}")
         return "Sorry, something went wrong while generating a response. Please try again later."
