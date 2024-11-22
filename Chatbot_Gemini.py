@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Constants for space-related keywords
-SPACE_KEYWORDS = ["space", "astronomy", "planet", "galaxy", "star", "NASA", "cosmos", "universe", "rocket", "satellite"]
+SPACE_KEYWORDS = ["space", "astronomy", "planet", "galaxy", "star", "NASA", "cosmos", "universe", "rocket", "satellite", "black hole", "asteroid", "meteor", "comet", "exoplanet", "nebula", "supernova", "light year", "spacecraft", "space station", "lunar", "solar system", "Milky Way", "interstellar", "astrobiology", "space exploration", "orbit", "constellation", "event horizon", "dark matter", "quasar"]
 
 # Custom CSS for background and styling
 BACKGROUND_IMAGE_URL = "https://cdn.zmescience.com/wp-content/uploads/2015/06/robot.jpg"
