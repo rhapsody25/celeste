@@ -14,6 +14,7 @@ GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 # Configure Google Generative Language API with API Key
 genai.configure(api_key=GOOGLE_API_KEY)
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 # Custom CSS for background and styling
 BACKGROUND_IMAGE_URL = "https://cdn.zmescience.com/wp-content/uploads/2015/06/robot.jpg"
@@ -74,11 +75,8 @@ if "chat_history" not in st.session_state:
 # Function to generate response using Google's Generative Language API
 def get_generative_response(prompt):
     try:
-        response = genai.chat(
-            context="You are a knowledgeable assistant specialized in space and the universe. Please answer questions in a simple and clear way.",
-            messages=[{"content": prompt}]
-        )
-        return response["candidates"][0]["content"]
+        response = model.generate_content(prompt)
+        return response.text
     except Exception as e:
         st.error(f"Error with Google Generative Language API: {e}")
         return "Sorry, something went wrong while generating a response. Please try again later."
