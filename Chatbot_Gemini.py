@@ -26,7 +26,7 @@ CUSTOM_CSS = f"""
     background-repeat: no-repeat;
     background-attachment: fixed;
     min-height: 100vh;
-    color: #000000;
+    color: #ffffff;
     font-family: 'Arial', sans-serif;
 }}
 
@@ -45,16 +45,16 @@ CUSTOM_CSS = f"""
     margin-bottom: 10px;
 }}
 
-.title {
+.title {{
     color: #000000;
     font-size: 2em;
     font-weight: bold;
-}
+}}
 
-.subtitle {
+.subtitle {{
     color: #000000;
     font-size: 1.5em;
-}
+}}
 </style>
 """
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
