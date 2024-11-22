@@ -2,44 +2,21 @@ import os
 import time
 import joblib
 import base64
+import plotly.express as px
 import streamlit as st
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Placeholder: Use a mock for Gemini API as a substitute during testing/debugging
-class MockGeminiChat:
-    def __init__(self, context, messages):
-        self.context = context
-        self.messages = messages
+# Get API Key from .env file for accessing Gemini API
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
-    def send_message(self, message, stream=False):
-        # Mock response
-        if "space" in message.lower():
-            return [{"text": "Space is vast and fascinating!"}]
-        else:
-            return [{"text": "I can only answer questions about space."}]
+# Configure Gemini API with API Key
+genai.configure(api_key=GOOGLE_API_KEY)
 
-# Replace `genai` with a mock class for testing
-class MockGeminiAPI:
-    @staticmethod
-    def configure(api_key):
-        pass
-
-    @staticmethod
-    def chat(context, messages):
-        return MockGeminiChat(context, messages)
-
-
-# Uncomment this when using the real Gemini API
-# import google.generativeai as genai
-# genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-
-# Using mock API for testing
-genai = MockGeminiAPI()
-
-# Create "data" folder if it doesn't exist
+# Create "data" folder if it doesn't exist. This folder is used to store past chats.
 if not os.path.exists('data/'):
     os.mkdir('data/')
 
@@ -49,6 +26,7 @@ if 'chat_id' not in st.session_state:
 if 'chat_title' not in st.session_state:
     st.session_state.chat_title = f'ChatSession-{st.session_state.chat_id}'
 if 'messages' not in st.session_state:
+    # Use a format compatible with the API
     st.session_state.messages = [
         {"content": "You are an expert in space-related topics. Please answer questions accordingly."}
     ]
@@ -69,9 +47,71 @@ with st.sidebar:
     )
     st.session_state.chat_title = f'ChatSession-{st.session_state.chat_id}'
 
+# Add CSS for improved styling
+def get_img_as_base64(file):
+    with open(file, "rb") as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+img = get_img_as_base64("images.png")
+page_bg_img = f"""
+<style>
+[data-testid="stAppViewContainer"] {{
+    background-image: url("https://cdn.zmescience.com/wp-content/uploads/2015/06/robot.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    opacity: 0.9;
+    color: #ffffff;
+    font-family: 'Arial', sans-serif;
+}}
+
+[data-testid="stSidebar"] {{
+    background-image: url("data:image/png;base64,{img}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    opacity: 0.85;
+    color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.4);
+}}
+
+[data-testid="stChatInput"] {{
+    background: rgba(255, 255, 255, 0.2);
+    color: #000000;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 10px;
+    border: 2px solid #ffffff;
+    font-family: 'Courier New', Courier, monospace;
+}}
+
+[data-testid="stMarkdownContainer"] {{
+    font-size: 1.2em;
+    line-height: 1.5;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}}
+
+[data-testid="stHeader"], [data-testid="stToolbar"] {{
+    background: rgba(0, 0, 0, 0) !important;
+    color: #ffffff;
+}}
+</style>
+"""
+st.markdown(page_bg_img, unsafe_allow_html=True)
+
 # Function to validate space-related queries
 def is_space_related(query):
-    keywords = ["space", "astronomy", "planet", "galaxy", "star", "NASA", "cosmos", "universe", "rocket", "satellite", "black hole"]
+    keywords = ["space", "astronomy", "planet", "galaxy", "star", "NASA", "cosmos", "universe", "rocket", "satellite"]
     return any(keyword in query.lower() for keyword in keywords)
 
 # Initialize the chat session
@@ -105,7 +145,7 @@ if prompt := st.chat_input('Ask me about space...'):
                 message_placeholder = st.empty()
                 full_response = ''
                 for chunk in response:
-                    full_response += chunk["text"]
+                    full_response += chunk.text
                     message_placeholder.markdown(full_response + '▌')
                 message_placeholder.markdown(full_response)
 
