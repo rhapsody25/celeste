@@ -1,19 +1,15 @@
 import os
 import time
 import streamlit as st
-import google.generativeai as genai
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Get API Key from .env file for accessing Gemini API
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+# Constants for space-related keywords
+SPACE_KEYWORDS = ["space", "astronomy", "planet", "galaxy", "star", "NASA", "cosmos", "universe", "rocket", "satellite"]
 
-# Configure Gemini API with API Key
-genai.configure(api_key=GOOGLE_API_KEY)
-
-# Custom CSS for chatbot layout and chat bubbles
+# Custom CSS for chatbot bubbles and layout
 CUSTOM_CSS = """
 <style>
 /* Chat container */
@@ -62,63 +58,52 @@ CUSTOM_CSS = """
 </style>
 """
 
-# Add CSS to Streamlit app
+# Add CSS
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
-# Title and description
+# Title
 st.title("🪐 Space Chatbot")
 st.write("Ask me anything about space and the universe! 🚀")
 
 # Helper function to check if a prompt is space-related
 def is_space_related(prompt):
-    space_keywords = ["space", "astronomy", "planet", "galaxy", "star", "NASA", "cosmos", "universe", "rocket", "satellite"]
-    return any(keyword in prompt.lower() for keyword in space_keywords)
+    return any(keyword in prompt.lower() for keyword in SPACE_KEYWORDS)
 
 # Initialize chat history in session state
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-# Function to generate response using Google's Generative AI API
-def get_gemini_response(prompt):
-    try:
-        response = genai.chat(
-            context="You are a knowledgeable assistant specialized in space and the universe. Please answer questions in a simple and clear way.",
-            messages=[{"content": prompt}]
-        )
-        return response["candidates"][0]["content"]
-    except Exception as e:
-        st.error(f"Error with Gemini API: {e}")
-        return "Sorry, something went wrong while generating a response. Please try again later."
+# Function to simulate bot response typing
+def generate_response(user_input):
+    if is_space_related(user_input):
+        # Simulate thinking process
+        time.sleep(1)  # Simulate processing delay
+        return f"That's a fascinating question about {user_input}! Here's some information you might find useful."
+    else:
+        return "Sorry, I can only answer questions about space and the universe. 🌌"
 
-# User input
+# Chat input box
 user_input = st.text_input("Type your message:", key="user_input", placeholder="Ask me about space...")
 
 # Process user input
 if user_input:
-    # Add user message to chat history
+    # Add user's message to chat history
     st.session_state.chat_history.append({"user": user_input, "bot": None})
 
-    # Check if the question is space-related
-    if is_space_related(user_input):
-        # Generate response from Gemini API
-        with st.spinner("Bot is typing..."):
-            bot_response = get_gemini_response(user_input)
-    else:
-        bot_response = "Sorry, I can only answer questions about space and the universe. 🌌"
-
-    # Add bot response to chat history
-    st.session_state.chat_history[-1]["bot"] = bot_response
+    # Generate a bot response
+    response = generate_response(user_input)
+    st.session_state.chat_history[-1]["bot"] = response
 
     # Clear input field
     st.session_state.user_input = ""
 
-# Display chat history in bubbles
+# Display chat history with bubbles
 st.markdown('<div class="chat-container">', unsafe_allow_html=True)
 for message in st.session_state.chat_history:
     # User message bubble
     st.markdown(f'<div class="user-message">{message["user"]}</div>', unsafe_allow_html=True)
 
-    # Bot message bubble
+    # Bot message bubble (with typing indicator)
     if message["bot"] is None:
         st.markdown('<div class="typing-indicator">Bot is typing...</div>', unsafe_allow_html=True)
     else:
