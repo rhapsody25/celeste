@@ -1,5 +1,4 @@
 import os
-import time
 import streamlit as st
 from dotenv import load_dotenv
 
@@ -9,56 +8,37 @@ load_dotenv()
 # Constants for space-related keywords
 SPACE_KEYWORDS = ["space", "astronomy", "planet", "galaxy", "star", "NASA", "cosmos", "universe", "rocket", "satellite"]
 
-# Custom CSS for chatbot bubbles and layout
-CUSTOM_CSS = """
+# Custom CSS for background and styling
+BACKGROUND_IMAGE_URL = "https://cdn.zmescience.com/wp-content/uploads/2015/06/robot.jpg"
+CUSTOM_CSS = f"""
 <style>
-/* Chat container */
-.chat-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-/* User message bubble */
-.user-message {
-    align-self: flex-start;
-    background-color: #d1f0ff;
-    color: #000000;
-    padding: 10px 15px;
-    border-radius: 15px;
-    max-width: 70%;
-    font-family: 'Arial', sans-serif;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-/* Bot message bubble */
-.bot-message {
-    align-self: flex-end;
-    background-color: #1e1e2d;
+[data-testid="stAppViewContainer"] {{
+    background-image: url("{BACKGROUND_IMAGE_URL}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
     color: #ffffff;
-    padding: 10px 15px;
-    border-radius: 15px;
-    max-width: 70%;
     font-family: 'Arial', sans-serif;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-}
+}}
 
-/* Typing indicator */
-.typing-indicator {
-    align-self: flex-end;
-    background-color: #1e1e2d;
+[data-testid="stSidebar"] {{
+    background: rgba(0, 0, 0, 0.7);
     color: #ffffff;
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-family: 'Arial', sans-serif;
-    font-style: italic;
-    opacity: 0.7;
-}
+    padding: 20px;
+    border-radius: 10px;
+}}
+
+.chat-box {{
+    background: rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}}
 </style>
 """
-
-# Add CSS
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
 # Title
@@ -73,39 +53,21 @@ def is_space_related(prompt):
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-# Function to simulate bot response typing
-def generate_response(user_input):
-    if is_space_related(user_input):
-        # Simulate thinking process
-        time.sleep(1)  # Simulate processing delay
-        return f"That's a fascinating question about {user_input}! Here's some information you might find useful."
-    else:
-        return "Sorry, I can only answer questions about space and the universe. 🌌"
+# Chat input
+user_input = st.text_input("Enter your message:")
 
-# Chat input box
-user_input = st.text_input("Type your message:", key="user_input", placeholder="Ask me about space...")
-
-# Process user input
+# Process the user's input
 if user_input:
-    # Add user's message to chat history
-    st.session_state.chat_history.append({"user": user_input, "bot": None})
-
-    # Generate a bot response
-    response = generate_response(user_input)
-    st.session_state.chat_history[-1]["bot"] = response
-
-    # Clear input field
-    st.session_state.user_input = ""
-
-# Display chat history with bubbles
-st.markdown('<div class="chat-container">', unsafe_allow_html=True)
-for message in st.session_state.chat_history:
-    # User message bubble
-    st.markdown(f'<div class="user-message">{message["user"]}</div>', unsafe_allow_html=True)
-
-    # Bot message bubble (with typing indicator)
-    if message["bot"] is None:
-        st.markdown('<div class="typing-indicator">Bot is typing...</div>', unsafe_allow_html=True)
+    if is_space_related(user_input):
+        # Example space-related response
+        response = f"That's a great question about space! Here's what I know about {user_input}."
     else:
-        st.markdown(f'<div class="bot-message">{message["bot"]}</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
+        response = "Sorry, I can only answer questions about space and the universe. 🌌"
+
+    # Update chat history
+    st.session_state.chat_history.append({"user": user_input, "bot": response})
+
+# Display chat history
+for message in st.session_state.chat_history:
+    st.markdown(f"<div class='chat-box'><strong>You:</strong> {message['user']}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='chat-box'><strong>Bot:</strong> {message['bot']}</div>", unsafe_allow_html=True)
