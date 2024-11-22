@@ -99,6 +99,9 @@ def is_space_related(prompt):
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
+if "user_input" not in st.session_state:
+    st.session_state.user_input = ""
+
 # Function to generate response using Google's Generative AI API
 def get_gemini_response(prompt):
     try:
