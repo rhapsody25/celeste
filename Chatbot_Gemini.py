@@ -21,7 +21,15 @@ GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 # Configure Google Generative Language API with API Key
 genai.configure(api_key=GOOGLE_API_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")
+
+# Function to generate response using Google's Generative Language API
+def get_generative_response(prompt):
+    try:
+        response = genai.generate_text(model="gemini-1.5-flash", prompt=prompt)
+        return response.result['text']
+    except Exception as e:
+        st.error(f"Error with Google Generative Language API: {e}")
+        return "Sorry, something went wrong while generating a response. Please try again later."
 
 # Custom CSS for background and styling
 BACKGROUND_IMAGE_URL = "https://cdn.zmescience.com/wp-content/uploads/2015/06/robot.jpg"
@@ -78,15 +86,6 @@ def is_space_related(prompt):
 # Initialize chat history in session state
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
-
-# Function to generate response using Google's Generative Language API
-def get_generative_response(prompt):
-    try:
-        response = model.generate_content(prompt)
-        return response.result['text']
-    except Exception as e:
-        st.error(f"Error with Google Generative Language API: {e}")
-        return "Sorry, something went wrong while generating a response. Please try again later."
 
 # Chat input
 user_input = st.text_input("Enter your message:")
