@@ -113,10 +113,11 @@ def is_space_related(query):
     keywords = ["space", "astronomy", "planet", "galaxy", "star", "NASA", "cosmos", "universe", "rocket", "satellite"]
     return any(keyword in query.lower() for keyword in keywords)
 
-# Initialize Gemini model
+# Initialize the chat session (no need for GenerativeModel)
 try:
-    st.session_state.model = genai.GenerativeModel('gemini-pro')
-    st.session_state.chat = st.session_state.model.start_chat(history=st.session_state.gemini_history)
+    st.session_state.chat = genai.chat(
+        context="You are an expert in space-related topics. Please answer questions accordingly."
+    )
 except Exception as e:
     st.error(f"Error initializing Gemini AI: {e}")
 
