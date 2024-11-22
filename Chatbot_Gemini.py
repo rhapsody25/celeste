@@ -13,14 +13,9 @@ GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 # Configure Gemini API with API Key
 genai.configure(api_key=GOOGLE_API_KEY)
 
-# Custom CSS for chatbot layout, chat bubbles, icons, and background image
+# Custom CSS for chatbot layout and chat bubbles
 CUSTOM_CSS = """
 <style>
-body {
-    background-image: url('https://cdn.zmescience.com/wp-content/uploads/2015/06/robot.jpg');
-    background-size: cover;
-}
-
 /* Chat container */
 .chat-container {
     display: flex;
@@ -39,14 +34,6 @@ body {
     max-width: 70%;
     font-family: 'Arial', sans-serif;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    position: relative;
-}
-
-.user-message::before {
-    content: '👤';
-    position: absolute;
-    left: -30px;
-    top: 10px;
 }
 
 /* Bot message bubble */
@@ -59,14 +46,6 @@ body {
     max-width: 70%;
     font-family: 'Arial', sans-serif;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    position: relative;
-}
-
-.bot-message::before {
-    content: '🤖';
-    position: absolute;
-    right: -30px;
-    top: 10px;
 }
 
 /* Typing indicator */
@@ -92,15 +71,12 @@ st.write("Ask me anything about space and the universe! 🚀")
 
 # Helper function to check if a prompt is space-related
 def is_space_related(prompt):
-    space_keywords = ["space", "astronomy", "planet", "galaxy", "star", "NASA", "cosmos", "universe", "rocket", "satellite", "black hole", "asteroid", "meteor", "comet", "exoplanet", "nebula", "supernova", "light year", "spacecraft", "space station", "lunar", "solar system", "Milky Way", "interstellar", "astrobiology", "space exploration", "orbit", "constellation", "event horizon", "dark matter", "quasar"]
+    space_keywords = ["space", "astronomy", "planet", "galaxy", "star", "NASA", "cosmos", "universe", "rocket", "satellite"]
     return any(keyword in prompt.lower() for keyword in space_keywords)
 
 # Initialize chat history in session state
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
-
-if "user_input" not in st.session_state:
-    st.session_state.user_input = ""
 
 # Function to generate response using Google's Generative AI API
 def get_gemini_response(prompt):
