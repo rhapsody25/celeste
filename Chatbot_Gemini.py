@@ -1,7 +1,9 @@
+# app.py
 import os
 import streamlit as st
 from dotenv import load_dotenv
 import google.generativeai as genai
+import unittest
 
 # Load environment variables from .env file
 load_dotenv()
@@ -28,8 +30,7 @@ def get_generative_response(prompt):
         response = genai.generate_text(model="gemini-1.5-flash", prompt=prompt)
         return response.result['text']
     except Exception as e:
-        st.error(f"Error with Google Generative Language API: {e}")
-        return "Sorry, something went wrong while generating a response. Please try again later."
+        return f"Error: {e}"
 
 # Custom CSS for background and styling
 BACKGROUND_IMAGE_URL = "https://cdn.zmescience.com/wp-content/uploads/2015/06/robot.jpg"
@@ -53,23 +54,35 @@ CUSTOM_CSS = f"""
     border-radius: 10px;
 }}
 
-.chat-box {{
-    background: rgba(0, 0, 0, 0.5);
-    color: #ffffff;
-    padding: 15px;
-    border-radius: 10px;
+.user-bubble {{
+    background-color: #d4f1f4;
+    color: #000;
+    padding: 10px;
+    border-radius: 15px;
     margin-bottom: 10px;
+    text-align: left;
+}}
+
+.bot-bubble {{
+    background-color: #323edd;
+    color: #fff;
+    padding: 10px;
+    border-radius: 15px;
+    margin-bottom: 10px;
+    text-align: left;
 }}
 
 .title {{
-    color: #000000;
+    color: #ffffff;
     font-size: 2em;
     font-weight: bold;
+    margin-bottom: 5px;
 }}
 
 .subtitle {{
-    color: #000000;
+    color: #ffffff;
     font-size: 1.5em;
+    margin-bottom: 20px;
 }}
 </style>
 """
@@ -103,5 +116,29 @@ if user_input:
 
 # Display chat history
 for message in st.session_state.chat_history:
-    st.markdown(f"<div class='chat-box'><strong>You:</strong> {message['user']}</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='chat-box'><strong>Bot:</strong> {message['bot']}</div>", unsafe_allow_html=True)
+    st.markdown(
+        f"<div class='user-bubble'><strong>😊 You:</strong> {message['user']}</div>", unsafe_allow_html=True
+    )
+    st.markdown(
+        f"<div class='bot-bubble'><strong>🤖 Bot:</strong> {message['bot']}</div>", unsafe_allow_html=True
+    )
+
+# --- Unit Tests ---
+class TestSpaceChatbot(unittest.TestCase):
+    def test_is_space_related(self):
+        # Positive cases
+        self.assertTrue(is_space_related("Tell me about galaxies."))
+        self.assertTrue(is_space_related("What is a black hole?"))
+        self.assertTrue(is_space_related("NASA missions"))
+        # Negative cases
+        self.assertFalse(is_space_related("What is the weather today?"))
+        self.assertFalse(is_space_related("Who is the president?"))
+    
+    def test_get_generative_response(self):
+        # Test response generation with a mock prompt
+        response = get_generative_response("Tell me about the Milky Way galaxy.")
+        self.assertIsInstance(response, str)  # Ensure the response is a string
+        self.assertNotEqual(response, "")  # Ensure the response is not empty
+
+if __name__ == "__main__":
+    unittest.main(argv=[''], exit=False)
