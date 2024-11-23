@@ -3,20 +3,17 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 import google.generativeai as genai
-import unittest
-import joblib
-import plotly.express as px
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Constants for space-related keywords
 SPACE_KEYWORDS = [
-    "space", "astronomy", "planet", "galaxy", "star", "NASA", "cosmos",
-    "universe", "rocket", "satellite", "black hole", "asteroid", "meteor",
-    "comet", "exoplanet", "nebula", "supernova", "light year", "spacecraft",
-    "space station", "lunar", "solar system", "Milky Way", "interstellar",
-    "astrobiology", "space exploration", "orbit", "constellation",
+    "space", "astronomy", "planet", "galaxy", "star", "NASA", "cosmos", 
+    "universe", "rocket", "satellite", "black hole", "asteroid", "meteor", 
+    "comet", "exoplanet", "nebula", "supernova", "light year", "spacecraft", 
+    "space station", "lunar", "solar system", "Milky Way", "interstellar", 
+    "astrobiology", "space exploration", "orbit", "constellation", 
     "event horizon", "dark matter", "quasar"
 ]
 
@@ -29,53 +26,79 @@ genai.configure(api_key=GOOGLE_API_KEY)
 # Function to generate response using Google's Generative Language API
 def get_generative_response(prompt):
     try:
-        # Use the appropriate model name
-        response = genai.generate_text(model="text-bison-001", prompt=prompt)
-        return response.result.get('output', "No response generated.")
+        response = genai.generate_text(model="gemini-1.5-flash", prompt=prompt)
+        return response.result['text']
     except Exception as e:
-        return f"Error: {e}"
+        st.error(f"Error with Google Generative Language API: {e}")
+        return "Sorry, something went wrong while generating a response. Please try again later."
 
-# Helper function to check if a prompt is space-related
-def is_space_related(prompt):
-    return any(keyword in prompt.lower() for keyword in SPACE_KEYWORDS)
-
-# Initialize chat history and analytics storage
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
-if "analytics" not in st.session_state:
-    st.session_state.analytics = {"questions": [], "responses": []}
-
-# Custom CSS for styling
-CUSTOM_CSS = """
+# Custom CSS for background and styling
+BACKGROUND_IMAGE_URL = "https://cdn.zmescience.com/wp-content/uploads/2015/06/robot.jpg"
+CUSTOM_CSS = f"""
 <style>
-[data-testid="stAppViewContainer"] {
-    background: #1f1f2e;
-    color: #fff;
-    font-family: Arial, sans-serif;
-}
-.user-bubble {
+[data-testid="stAppViewContainer"] {{
+    background-image: url("{BACKGROUND_IMAGE_URL}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: #ffffff;
+    font-family: 'Arial', sans-serif;
+}}
+
+[data-testid="stSidebar"] {{
+    background: rgba(0, 0, 0, 0.7);
+    color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+}}
+
+.user-bubble {{
     background-color: #d4f1f4;
     color: #000;
     padding: 10px;
     border-radius: 15px;
     margin-bottom: 10px;
     text-align: left;
-}
-.bot-bubble {
+}}
+
+.bot-bubble {{
     background-color: #323edd;
     color: #fff;
     padding: 10px;
     border-radius: 15px;
     margin-bottom: 10px;
     text-align: left;
-}
+}}
+
+.title {{
+    color: #ffffff;
+    font-size: 2em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}}
+
+.subtitle {{
+    color: #ffffff;
+    font-size: 1.5em;
+    margin-bottom: 20px;
+}}
 </style>
 """
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
 # Title
-st.title("🪐 Space Chatbot")
-st.subheader("Ask me anything about space and the universe! 🚀")
+st.markdown("<div class='title'>🪐 Space Chatbot</div>", unsafe_allow_html=True)
+st.markdown("<div class='subtitle'>Ask me anything about space and the universe! 🚀</div>", unsafe_allow_html=True)
+
+# Helper function to check if a prompt is space-related
+def is_space_related(prompt):
+    return any(keyword in prompt.lower() for keyword in SPACE_KEYWORDS)
+
+# Initialize chat history in session state
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 
 # Chat input
 user_input = st.text_input("Enter your message:")
@@ -90,44 +113,12 @@ if user_input:
 
     # Update chat history
     st.session_state.chat_history.append({"user": user_input, "bot": response})
-    st.session_state.analytics["questions"].append(user_input)
-    st.session_state.analytics["responses"].append(len(response.split()))  # Response length for analytics
 
 # Display chat history
 for message in st.session_state.chat_history:
-    st.markdown(f"<div class='user-bubble'><strong>😊 You:</strong> {message['user']}</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='bot-bubble'><strong>🤖 Bot:</strong> {message['bot']}</div>", unsafe_allow_html=True)
-
-# Optional analytics using Plotly
-if st.session_state.analytics["questions"]:
-    st.subheader("Chat Analytics 📊")
-    analytics_df = joblib.Parallel(n_jobs=-1)(
-        joblib.delayed(pd.DataFrame)(
-            {
-                "Question": st.session_state.analytics["questions"],
-                "Response Length": st.session_state.analytics["responses"]
-            }
-        )
+    st.markdown(
+        f"<div class='user-bubble'><strong>😊 You:</strong> {message['user']}</div>", unsafe_allow_html=True
     )
-    fig = px.bar(analytics_df, x="Question", y="Response Length", title="Response Length per Question")
-    st.plotly_chart(fig)
-
-# --- Unit Tests ---
-class TestSpaceChatbot(unittest.TestCase):
-    def test_is_space_related(self):
-        # Positive cases
-        self.assertTrue(is_space_related("Tell me about galaxies."))
-        self.assertTrue(is_space_related("What is a black hole?"))
-        self.assertTrue(is_space_related("NASA missions"))
-        # Negative cases
-        self.assertFalse(is_space_related("What is the weather today?"))
-        self.assertFalse(is_space_related("Who is the president?"))
-
-    def test_get_generative_response(self):
-        # Test response generation with a mock prompt
-        response = get_generative_response("Tell me about the Milky Way galaxy.")
-        self.assertIsInstance(response, str)  # Ensure the response is a string
-        self.assertNotEqual(response, "")  # Ensure the response is not empty
-
-if __name__ == "__main__":
-    unittest.main(argv=[''], exit=False)
+    st.markdown(
+        f"<div class='bot-bubble'><strong>🤖 Bot:</strong> {message['bot']}</div>", unsafe_allow_html=True
+    )
